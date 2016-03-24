@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -28,9 +29,13 @@ type Cabinet struct {
 var (
 	machines []string
 	cabinet  map[string]*Cabinet
+	lock     sync.Mutex
 )
 
 func serveCabinets(w http.ResponseWriter, r *http.Request) {
+	lock.Lock()
+	defer lock.Unlock()
+
 	b, err := json.Marshal(cabinet)
 	if err != nil {
 		// XXX internal error
@@ -40,6 +45,9 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveMachines(w http.ResponseWriter, r *http.Request) {
+	lock.Lock()
+	defer lock.Unlock()
+
 	b, err := json.Marshal(machines)
 	if err != nil {
 		// XXX internal error
@@ -54,6 +62,8 @@ func readmap(mapfile string) error {
 		return err
 	}
 	defer file.Close()
+
+	machines = make([]string, 0)
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -92,18 +102,37 @@ func readmap(mapfile string) error {
 	return nil
 }
 
+func scan(mapfile string, refresh int) {
+	for {
+		lock.Lock()
+
+		if err := readmap(mapfile); err != nil {
+			log.Println("readmap", err)
+		}
+
+		log.Println("scan complete")
+
+		lock.Unlock()
+
+		if refresh == 0 {
+			return
+		}
+
+		time.Sleep(time.Minute * time.Duration(refresh))
+	}
+}
+
 func main() {
 	port := flag.String("port", "8889", "http port number")
 	labmap := flag.String("map", "lab.map", "lab configuration map")
+	refresh := flag.Int("refresh", 60, "Time between map refresh scans")
 
 	flag.Parse()
 
 	machines = make([]string, 0)
 	cabinet = make(map[string]*Cabinet)
 
-	if err := readmap(*labmap); err != nil {
-		log.Fatal("readmap", err)
-	}
+	go scan(*labmap, *refresh)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/machines/", serveMachines)
