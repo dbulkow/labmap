@@ -36,7 +36,22 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	b, err := json.Marshal(cabinet)
+	machine := strings.TrimPrefix(r.URL.Path, "/v1/cabinet/")
+
+	var val interface{}
+
+	if machine != "" {
+		c, ok := cabinet[machine]
+		if !ok {
+			// XXX StatusNotFound
+			return
+		}
+		val = c
+	} else {
+		val = cabinet
+	}
+
+	b, err := json.Marshal(val)
 	if err != nil {
 		// XXX internal error
 	}
