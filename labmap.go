@@ -60,25 +60,25 @@ func readmap(mapfile string) error {
 		words := strings.Fields(scanner.Text())
 
 		machine := words[0]
-		cab := strings.TrimPrefix(words[1], "lnx")
+		cab := words[1]
 		pos := strings.TrimPrefix(words[2], "pos")
 		outlet := strings.TrimPrefix(words[5], "pdu")
 
 		c := &Cabinet{
 			VTM0:     machine + "-vtm0",
 			VTM1:     machine + "-vtm1",
-			Cabinet:  cab,
+			Cabinet:  strings.TrimPrefix(cab, "lnx"),
 			Position: pos,
 			Outlet:   outlet,
-			PDU0:     "lnx" + cab + "-pdu0",
-			PDU1:     "lnx" + cab + "-pdu0",
+			PDU0:     cab + "-pdu0",
+			PDU1:     cab + "-pdu0",
 		}
 
 		if strings.TrimPrefix(words[3], "com1-") == "yes" {
-			c.COM1 = "telnet lnx" + cab + "-debug 100" + pos + "1"
+			c.COM1 = "telnet " + cab + "-debug 100" + pos + "1"
 		}
 		if strings.TrimPrefix(words[3], "com2-") == "yes" {
-			c.COM2 = "telnet lnx" + cab + "-debug 100" + pos + "2"
+			c.COM2 = "telnet " + cab + "-debug 100" + pos + "2"
 		}
 
 		if len(words) == 7 {
