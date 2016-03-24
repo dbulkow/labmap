@@ -87,7 +87,7 @@ func readmap(mapfile string) error {
 		if strings.TrimPrefix(words[3], "com1-") == "yes" {
 			c.COM1 = "telnet " + cab + "-debug 100" + pos + "1"
 		}
-		if strings.TrimPrefix(words[3], "com2-") == "yes" {
+		if strings.TrimPrefix(words[4], "com2-") == "yes" {
 			c.COM2 = "telnet " + cab + "-debug 100" + pos + "2"
 		}
 
