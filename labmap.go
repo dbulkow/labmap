@@ -96,7 +96,7 @@ func readmap(mapfile string) error {
 			Position: pos,
 			Outlet:   outlet,
 			PDU0:     cab + "-pdu0",
-			PDU1:     cab + "-pdu0",
+			PDU1:     cab + "-pdu1",
 		}
 
 		if strings.TrimPrefix(words[3], "com1-") == "yes" {
