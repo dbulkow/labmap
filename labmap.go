@@ -149,6 +149,8 @@ func main() {
 
 	go scan(*labmap, *refresh)
 
+	log.Println("listening on port", *port)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/machines/", serveMachines)
 	mux.HandleFunc("/v1/cabinet/", serveCabinets)
