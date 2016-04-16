@@ -1,0 +1,17 @@
+{
+    "status": "Success",
+    "response": {
+        "lin302": {
+            "vtm0": "lin302-vtm0",
+            "vtm1": "lin302-vtm1",
+            "cabinet": "2",
+            "position": "0",
+            "com1": "",
+            "com2": "telnet lnx2-debug 10002",
+            "outlet": "5",
+            "kvm": "lnx2-kvm",
+            "pdu0": "lnx2-pdu0",
+            "pdu1": "lnx2-pdu1"
+        }
+    }
+}

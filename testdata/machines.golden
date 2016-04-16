@@ -1,0 +1,11 @@
+{
+    "status": "Success",
+    "response": {
+        "machines": [
+            "onemachine",
+            "twomachine",
+            "threemachine",
+            "four"
+        ]
+    }
+}
