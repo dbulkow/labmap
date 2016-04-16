@@ -63,9 +63,9 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	machine := strings.TrimPrefix(r.URL.Path, "/v1/cabinet/")
-
 	var val interface{}
+
+	machine := r.URL.Path
 
 	if machine != "" {
 		c, ok := cabinet[machine]
@@ -168,6 +168,11 @@ func scan(mapfile string, refresh int) {
 	}
 }
 
+const (
+	CabinetBase = "/v1/cabinet/"
+	MachineBase = "/v1/machines/"
+)
+
 func main() {
 	port := flag.String("port", "8889", "http port number")
 	labmap := flag.String("map", "lab.map", "lab configuration map")
@@ -183,8 +188,8 @@ func main() {
 	log.Println("listening on port", *port)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/v1/machines/", serveMachines)
-	mux.HandleFunc("/v1/cabinet/", serveCabinets)
+	mux.Handle(MachineBase, http.StripPrefix(MachineBase, http.HandlerFunc(serveMachines)))
+	mux.Handle(CabinetBase, http.StripPrefix(CabinetBase, http.HandlerFunc(serveCabinets)))
 
 	srv := &http.Server{
 		Addr:           ":" + *port,
