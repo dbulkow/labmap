@@ -26,6 +26,32 @@ type Cabinet struct {
 	PDU1     string `json:"pdu1"`
 }
 
+type Reply struct {
+	Status string `json:"status"`
+	Error  string `json:"error,omitempty"`
+}
+
+func (r *Reply) Reply(w http.ResponseWriter) {
+	b, err := json.MarshalIndent(r, "", "    ")
+	if err != nil {
+		http.Error(w, "Internal Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(b)
+}
+
+func (r *Reply) Success(w http.ResponseWriter) {
+	r.Status = "Success"
+	r.Reply(w)
+}
+
+func (r *Reply) Failed(w http.ResponseWriter, errstr string) {
+	r.Status = "Failed"
+	r.Error = errstr
+	r.Reply(w)
+}
+
 var (
 	machines []string
 	cabinet  map[string]*Cabinet
@@ -33,6 +59,8 @@ var (
 )
 
 func serveCabinets(w http.ResponseWriter, r *http.Request) {
+	var rpy Reply
+
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -43,7 +71,7 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 	if machine != "" {
 		c, ok := cabinet[machine]
 		if !ok {
-			// XXX StatusNotFound
+			rpy.Failed(w, http.StatusText(http.StatusNotFound))
 			return
 		}
 		val = c
@@ -53,19 +81,23 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 
 	b, err := json.Marshal(val)
 	if err != nil {
-		// XXX internal error
+		rpy.Failed(w, http.StatusText(http.StatusInternalServerError))
+		return
 	}
 
 	fmt.Fprintf(w, string(b))
 }
 
 func serveMachines(w http.ResponseWriter, r *http.Request) {
+	var rpy Reply
+
 	lock.Lock()
 	defer lock.Unlock()
 
 	b, err := json.Marshal(machines)
 	if err != nil {
-		// XXX internal error
+		rpy.Failed(w, http.StatusText(http.StatusInternalServerError))
+		return
 	}
 
 	fmt.Fprintf(w, string(b))
