@@ -26,9 +26,11 @@ type Cabinet struct {
 }
 
 type Reply struct {
-	Status   string      `json:"status"`
-	Error    string      `json:"error,omitempty"`
-	Response interface{} `json:"response,omitempty"`
+	Status   string              `json:"status"`
+	Error    string              `json:"error,omitempty"`
+	Cabinet  *Cabinet            `json:"cabinet,omitempty"`
+	Cabinets map[string]*Cabinet `json:"cabinets,omitempty"`
+	Machines []string            `json:"machines,omitempty"`
 }
 
 func (r *Reply) Reply(w http.ResponseWriter) {
@@ -41,9 +43,8 @@ func (r *Reply) Reply(w http.ResponseWriter) {
 	w.Write(b)
 }
 
-func (r *Reply) Success(w http.ResponseWriter, resp interface{}) {
+func (r *Reply) Success(w http.ResponseWriter) {
 	r.Status = "Success"
-	r.Response = resp
 	r.Reply(w)
 }
 
@@ -65,8 +66,6 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	var val interface{}
-
 	machine := r.URL.Path
 
 	if machine != "" {
@@ -75,12 +74,12 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 			rpy.Failed(w, http.StatusText(http.StatusNotFound))
 			return
 		}
-		val = c
+		rpy.Cabinet = c
 	} else {
-		val = cabinet
+		rpy.Cabinets = cabinet
 	}
 
-	rpy.Success(w, val)
+	rpy.Success(w)
 }
 
 func serveMachines(w http.ResponseWriter, r *http.Request) {
@@ -89,13 +88,8 @@ func serveMachines(w http.ResponseWriter, r *http.Request) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	var m struct {
-		Machines []string `json:"machines"`
-	}
-
-	m.Machines = machines
-
-	rpy.Success(w, m)
+	rpy.Machines = machines
+	rpy.Success(w)
 }
 
 func updateMap(words []string) {

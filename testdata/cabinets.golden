@@ -1,6 +1,6 @@
 {
     "status": "Success",
-    "response": {
+    "cabinets": {
         "lin302": {
             "vtm0": "lin302-vtm0",
             "vtm1": "lin302-vtm1",

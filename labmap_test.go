@@ -50,3 +50,23 @@ func TestCabinets(t *testing.T) {
 		t.Error("response != golden")
 	}
 }
+
+func TestCabinet(t *testing.T) {
+	cabinet = make(map[string]*Cabinet)
+
+	readmap("testdata/cabinet.map")
+
+	req, _ := http.NewRequest("GET", "lin302", nil)
+	w := httptest.NewRecorder()
+
+	serveCabinets(w, req)
+
+	golden, err := ioutil.ReadFile("testdata/cabinet.golden")
+	if err != nil {
+		t.Fatal("read cabinets.golden:", err)
+	}
+
+	if bytes.Compare(golden, w.Body.Bytes()) != 0 {
+		t.Error("response != golden")
+	}
+}
