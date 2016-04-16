@@ -93,6 +93,12 @@ func serveMachines(w http.ResponseWriter, r *http.Request) {
 	lock.Lock()
 	defer lock.Unlock()
 
+	var m struct {
+		Machines []string `json:"machines"`
+	}
+
+	m.Machines = machines
+
 	b, err := json.MarshalIndent(m, "", "    ")
 	if err != nil {
 		rpy.Failed(w, http.StatusText(http.StatusInternalServerError))
