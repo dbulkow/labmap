@@ -26,8 +26,9 @@ type Cabinet struct {
 }
 
 type Reply struct {
-	Status string `json:"status"`
-	Error  string `json:"error,omitempty"`
+	Status   string      `json:"status"`
+	Error    string      `json:"error,omitempty"`
+	Response interface{} `json:"response,omitempty"`
 }
 
 func (r *Reply) Reply(w http.ResponseWriter) {
@@ -40,8 +41,9 @@ func (r *Reply) Reply(w http.ResponseWriter) {
 	w.Write(b)
 }
 
-func (r *Reply) Success(w http.ResponseWriter) {
+func (r *Reply) Success(w http.ResponseWriter, resp interface{}) {
 	r.Status = "Success"
+	r.Response = resp
 	r.Reply(w)
 }
 
@@ -78,13 +80,7 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 		val = cabinet
 	}
 
-	b, err := json.MarshalIndent(val, "", "    ")
-	if err != nil {
-		rpy.Failed(w, http.StatusText(http.StatusInternalServerError))
-		return
-	}
-
-	w.Write(b)
+	rpy.Success(w, val)
 }
 
 func serveMachines(w http.ResponseWriter, r *http.Request) {
@@ -99,13 +95,7 @@ func serveMachines(w http.ResponseWriter, r *http.Request) {
 
 	m.Machines = machines
 
-	b, err := json.MarshalIndent(m, "", "    ")
-	if err != nil {
-		rpy.Failed(w, http.StatusText(http.StatusInternalServerError))
-		return
-	}
-
-	w.Write(b)
+	rpy.Success(w, m)
 }
 
 func updateMap(words []string) {
