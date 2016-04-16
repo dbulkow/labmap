@@ -174,9 +174,11 @@ const (
 )
 
 func main() {
-	port := flag.String("port", "8889", "http port number")
-	labmap := flag.String("map", "lab.map", "lab configuration map")
-	refresh := flag.Int("refresh", 60, "Time between map refresh scans")
+	var (
+		port    = flag.String("port", "8889", "http port number")
+		labmap  = flag.String("map", "lab.map", "lab configuration map")
+		refresh = flag.Int("refresh", 60, "Time between map refresh scans")
+	)
 
 	flag.Parse()
 
