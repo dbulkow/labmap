@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -85,7 +84,7 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, string(b))
+	w.Write(b)
 }
 
 func serveMachines(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +99,7 @@ func serveMachines(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, string(b))
+	w.Write(b)
 }
 
 func readmap(mapfile string) error {
