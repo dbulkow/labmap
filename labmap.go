@@ -78,7 +78,7 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 		val = cabinet
 	}
 
-	b, err := json.Marshal(val)
+	b, err := json.MarshalIndent(val, "", "    ")
 	if err != nil {
 		rpy.Failed(w, http.StatusText(http.StatusInternalServerError))
 		return
@@ -93,7 +93,7 @@ func serveMachines(w http.ResponseWriter, r *http.Request) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	b, err := json.Marshal(machines)
+	b, err := json.MarshalIndent(m, "", "    ")
 	if err != nil {
 		rpy.Failed(w, http.StatusText(http.StatusInternalServerError))
 		return
