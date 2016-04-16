@@ -108,6 +108,44 @@ func serveMachines(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func updateMap(words []string) {
+	machine := words[0]
+	cab := words[1]
+	pos := strings.TrimPrefix(words[2], "pos")
+	outlet := strings.TrimPrefix(words[5], "pdu")
+	com1 := strings.TrimPrefix(words[3], "com1-")
+	com2 := strings.TrimPrefix(words[4], "com2-")
+	kvm := ""
+	if len(words) == 7 {
+		kvm = strings.TrimPrefix(words[6], "kvm")
+	}
+
+	c := &Cabinet{
+		VTM0:     machine + "-vtm0",
+		VTM1:     machine + "-vtm1",
+		Cabinet:  strings.TrimPrefix(cab, "lnx"),
+		Position: pos,
+		Outlet:   outlet,
+		PDU0:     cab + "-pdu0",
+		PDU1:     cab + "-pdu1",
+	}
+
+	if com1 == "yes" {
+		c.COM1 = "telnet " + cab + "-debug 100" + pos + "1"
+	}
+
+	if com2 == "yes" {
+		c.COM2 = "telnet " + cab + "-debug 100" + pos + "2"
+	}
+
+	if kvm != "" {
+		c.KVM = "lnx" + kvm + "-kvm"
+	}
+
+	cabinet[machine] = c
+	machines = append(machines, machine)
+}
+
 func readmap(mapfile string) error {
 	file, err := os.Open(mapfile)
 	if err != nil {
@@ -119,36 +157,7 @@ func readmap(mapfile string) error {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		words := strings.Fields(scanner.Text())
-
-		machine := words[0]
-		cab := words[1]
-		pos := strings.TrimPrefix(words[2], "pos")
-		outlet := strings.TrimPrefix(words[5], "pdu")
-
-		c := &Cabinet{
-			VTM0:     machine + "-vtm0",
-			VTM1:     machine + "-vtm1",
-			Cabinet:  strings.TrimPrefix(cab, "lnx"),
-			Position: pos,
-			Outlet:   outlet,
-			PDU0:     cab + "-pdu0",
-			PDU1:     cab + "-pdu1",
-		}
-
-		if strings.TrimPrefix(words[3], "com1-") == "yes" {
-			c.COM1 = "telnet " + cab + "-debug 100" + pos + "1"
-		}
-		if strings.TrimPrefix(words[4], "com2-") == "yes" {
-			c.COM2 = "telnet " + cab + "-debug 100" + pos + "2"
-		}
-
-		if len(words) == 7 {
-			c.KVM = "lnx" + strings.TrimPrefix(words[6], "kvm") + "-kvm"
-		}
-
-		cabinet[machine] = c
-		machines = append(machines, machine)
+		updateMap(strings.Fields(scanner.Text()))
 	}
 
 	return nil
