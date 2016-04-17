@@ -1,1 +1,2 @@
 lin302  lnx2 pos0 com1-no  com2-yes pdu5 kvm2
+lin303  lnx3 pos0 com1-yes com2-no  pdu4 kvm3

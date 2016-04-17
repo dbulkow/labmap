@@ -12,6 +12,18 @@
             "kvm": "lnx2-kvm",
             "pdu0": "lnx2-pdu0",
             "pdu1": "lnx2-pdu1"
+        },
+        "lin303": {
+            "vtm0": "lin303-vtm0",
+            "vtm1": "lin303-vtm1",
+            "cabinet": "3",
+            "position": "0",
+            "com1": "telnet lnx3-debug 10001",
+            "com2": "",
+            "outlet": "4",
+            "kvm": "lnx3-kvm",
+            "pdu0": "lnx3-pdu0",
+            "pdu1": "lnx3-pdu1"
         }
     }
 }
