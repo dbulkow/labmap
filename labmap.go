@@ -131,6 +131,9 @@ func updateMap(words []string) {
 }
 
 func readmap(mapfile string) error {
+	lock.Lock()
+	defer lock.Unlock()
+
 	file, err := os.Open(mapfile)
 	if err != nil {
 		return err
@@ -145,26 +148,6 @@ func readmap(mapfile string) error {
 	}
 
 	return nil
-}
-
-func scan(mapfile string, refresh int) {
-	for {
-		lock.Lock()
-
-		if err := readmap(mapfile); err != nil {
-			log.Println("readmap", err)
-		}
-
-		log.Println("scan complete")
-
-		lock.Unlock()
-
-		if refresh == 0 {
-			return
-		}
-
-		time.Sleep(time.Minute * time.Duration(refresh))
-	}
 }
 
 const (
@@ -184,7 +167,18 @@ func main() {
 	machines = make([]string, 0)
 	cabinet = make(map[string]*Cabinet)
 
-	go scan(*labmap, *refresh)
+	go func() {
+		for {
+			if err := readmap(*labmap); err != nil {
+				log.Println("readmap", err)
+			}
+			log.Println("scan complete")
+			if *refresh == 0 {
+				return
+			}
+			time.Sleep(time.Minute * time.Duration(*refresh))
+		}
+	}()
 
 	log.Println("listening on port", *port)
 
