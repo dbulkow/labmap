@@ -40,6 +40,8 @@ func (r *Reply) Reply(w http.ResponseWriter) {
 		return
 	}
 
+	w.Header().Set("Content-type", "application/json")
+	w.Header().Set("Cache-control", "no-cache")
 	w.Write(b)
 }
 
