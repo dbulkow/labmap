@@ -13,6 +13,16 @@ lin306  lnx7 pos0 com1-no  com2-yes pdu5 kvm6
 
 The goal of labmap is to provide the backing data needed for the VTM links web page.  lab.map should be deployed from the lab_config git repository so that changes in git are reflected in the web page.
 
+~~~~
+Usage of ./labmap:
+  -map string
+    	lab configuration map (default "lab.map")
+  -port string
+    	http port number (default "8889")
+  -refresh int
+    	Time between map refresh scans (default 60)
+~~~~
+
 # JSON requests and replies
 
 Only GET methods are supported.
