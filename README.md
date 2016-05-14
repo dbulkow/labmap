@@ -45,8 +45,10 @@ type Reply struct {
 | error    | string   | When status is "Failed" the error field will be error test from the server |
 | machines | array of string | Machine names |
 
-## /v1/cabinet/
+## /v1/cabinet/<machine>
 
+Without a machine name in the URL the reply will be a map of Cabinets.
+With a machine name, the reply will contain a single Cabinet.
 ~~~~
 type Reply struct {
 	Status   string              `json:"status"`
