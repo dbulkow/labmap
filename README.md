@@ -193,3 +193,9 @@ type Cabinet struct {
 | pdu1     | string | Name of PDU1 |
 
 Names can be decoded using the macmap service.
+
+# Docker environment
+
+~~~~
+docker run --rm -it -v <path to lab_config/bmcs/lab.map:/resources/lab.map -p 9001:8889 --name labmap labmap
+~~~~
