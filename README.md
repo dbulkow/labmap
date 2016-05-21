@@ -27,11 +27,30 @@ Usage of ./labmap:
 
 Only GET methods are supported.
 
+## List machines
+
+Returns a list of machines from lab.map.  Used by labhtml to order the machine list on the VTM links paage.
+
 ~~~~
 GET /v1/machines/
 ~~~~
 
-Returns a list of machines from lab.map.  Used by labhtml to order the machine list on the VTM links paage.
+Response
+
+~~~~
+Status: 200 OK
+Content-Type: application/json
+~~~~
+~~~~
+{
+    "status": "Success",
+    "machines": [
+        "lin01",
+        "lin02",
+        "lin03",
+    ]
+}
+~~~~
 
 ~~~~
 type Reply struct {
