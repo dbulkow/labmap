@@ -23,11 +23,7 @@ Usage of ./labmap:
     	Time between map refresh scans (default 60)
 ~~~~
 
-# JSON requests and replies
-
-Only GET methods are supported.
-
-## List machines
+# List machines
 
 Returns a list of machines from lab.map.  Used by labhtml to order the machine list on the VTM links paage.
 
@@ -68,7 +64,7 @@ type Reply struct {
 | error    | string   | When status is "Failed" the error field will be error test from the server |
 | machines | array of string | Machine names |
 
-## List of Cabinets
+# List of Cabinets
 
 Without a machine name in the URL the reply will be a map of Cabinets.
 
