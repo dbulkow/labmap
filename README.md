@@ -52,6 +52,8 @@ Content-Type: application/json
 }
 ~~~~
 
+Golang
+
 ~~~~
 type Reply struct {
 	Status   string   `json:"status"`
@@ -66,10 +68,83 @@ type Reply struct {
 | error    | string   | When status is "Failed" the error field will be error test from the server |
 | machines | array of string | Machine names |
 
-## /v1/cabinet/
+## List of Cabinets
 
 Without a machine name in the URL the reply will be a map of Cabinets.
-With a machine name, the reply will contain a single Cabinet, as in `http://yin.mno.stratus.com/v1/platformid/<machine>`.
+
+~~~~
+GET /v1/cabinet/
+~~~~
+
+Response
+
+~~~~
+Status: 200 OK
+Content-Type: application/json
+~~~~
+~~~~
+{
+    "status": "Success",
+    "cabinets": {
+        "lin01": {
+            "vtm0": "lin01-vtm0",
+	    "vtm1": "lin01-vtm1",
+	    "cabinet": "1",
+	    "position": "2",
+	    "com1": "",
+	    "com2": "telnet lnx1-debug 12345",
+	    "outlet": "15",
+	    "kvm": "lnx1-kvm",
+	    "pdu0": "lnx1-pdu0",
+	    "pdu1": "lnx1-pdu1"
+	},
+        "lin02": {
+            "vtm0": "lin02-vtm0",
+	    "vtm1": "lin02-vtm1",
+	    "cabinet": "1",
+	    "position": "3",
+	    "com1": "",
+	    "com2": "telnet lnx1-debug 12346",
+	    "outlet": "18",
+	    "kvm": "lnx1-kvm",
+	    "pdu0": "lnx1-pdu0",
+	    "pdu1": "lnx1-pdu1"
+	}
+    }
+}
+~~~~
+
+With a machine name, the reply will contain a single Cabinet.
+
+~~~~
+GET /v1/cabinet/lin01
+~~~~
+
+Response
+
+~~~~
+Status: 200 OK
+Content-Type: application/json
+~~~~
+~~~~
+{
+    "status": "Success",
+    "cabinet": {
+        "vtm0": "lin01-vtm0",
+        "vtm1": "lin01-vtm1",
+        "cabinet": "1",
+        "position": "2",
+        "com1": "",
+        "com2": "telnet lnx1-debug 12345",
+        "outlet": "15",
+        "kvm": "lnx1-kvm",
+        "pdu0": "lnx1-pdu0",
+        "pdu1": "lnx1-pdu1"
+    }
+}
+~~~~
+
+Golang
 
 ~~~~
 type Reply struct {
