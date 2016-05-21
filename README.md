@@ -27,7 +27,9 @@ Usage of ./labmap:
 
 Only GET methods are supported.
 
-## /v1/machines/
+~~~~
+GET /v1/machines/
+~~~~
 
 Returns a list of machines from lab.map.  Used by labhtml to order the machine list on the VTM links paage.
 
