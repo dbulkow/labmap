@@ -31,7 +31,7 @@ Returns a list of machines from lab.map.  Used by labhtml to order the machine l
 GET /v1/machines/
 ~~~~
 
-Response
+#### Response
 
 ~~~~
 Status: 200 OK
@@ -48,7 +48,7 @@ Content-Type: application/json
 }
 ~~~~
 
-Golang
+#### Golang
 
 ~~~~
 type Reply struct {
@@ -72,7 +72,7 @@ Without a machine name in the URL the reply will be a map of Cabinets.
 GET /v1/cabinet/
 ~~~~
 
-Response
+#### Response
 
 ~~~~
 Status: 200 OK
@@ -116,7 +116,7 @@ With a machine name, the reply will contain a single Cabinet.
 GET /v1/cabinet/lin01
 ~~~~
 
-Response
+#### Response
 
 ~~~~
 Status: 200 OK
@@ -140,7 +140,7 @@ Content-Type: application/json
 }
 ~~~~
 
-Golang
+#### Golang
 
 ~~~~
 type Reply struct {
