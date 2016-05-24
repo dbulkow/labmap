@@ -7,4 +7,5 @@ WORKDIR /go/src/app
 CMD ["go-wrapper", "run", "-map", "/resources/lab.map"]
 
 COPY . /go/src/app
+COPY lab.map /resources/lab.map
 RUN go-wrapper install
