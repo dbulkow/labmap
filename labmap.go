@@ -159,7 +159,7 @@ const (
 
 func main() {
 	var (
-		port    = flag.String("port", "8889", "http port number")
+		port    = flag.String("port", "8080", "http port number")
 		labmap  = flag.String("map", "lab.map", "lab configuration map")
 		refresh = flag.Int("refresh", 60, "Time between map refresh scans")
 	)
@@ -182,8 +182,6 @@ func main() {
 		}
 	}()
 
-	log.Println("listening on port", *port)
-
 	mux := http.NewServeMux()
 	mux.Handle(MachineBase, http.StripPrefix(MachineBase, http.HandlerFunc(serveMachines)))
 	mux.Handle(CabinetBase, http.StripPrefix(CabinetBase, http.HandlerFunc(serveCabinets)))
@@ -196,6 +194,8 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 		TLSNextProto:   nil,
 	}
+
+	log.Println("listening on port", *port)
 
 	log.Fatal(srv.ListenAndServe())
 }
