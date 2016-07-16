@@ -18,7 +18,11 @@ type Cabinet struct {
 	Cabinet  string `json:"cabinet"`
 	Position string `json:"position"`
 	COM1     string `json:"com1"`
+	Serial1  string `json:"serial1"`
+	Params1  string `json:"params1"`
 	COM2     string `json:"com2"`
+	Serial2  string `json:"serial2"`
+	Params2  string `json:"params2"`
 	Outlet   string `json:"outlet"`
 	KVM      string `json:"kvm"`
 	PDU0     string `json:"pdu0"`
@@ -116,12 +120,22 @@ func updateMap(words []string) {
 		PDU1:     cab + "-pdu1",
 	}
 
-	if com1 == "yes" {
+	if com1 != "no" {
 		c.COM1 = "telnet " + cab + "-debug 100" + pos + "1"
+		serial := strings.Split(com1, ":")
+		if len(serial) == 2 {
+			c.Params1 = serial[0]
+			c.Serial1 = serial[1]
+		}
 	}
 
-	if com2 == "yes" {
+	if com2 != "no" {
 		c.COM2 = "telnet " + cab + "-debug 100" + pos + "2"
+		serial := strings.Split(com2, ":")
+		if len(serial) == 2 {
+			c.Params2 = serial[0]
+			c.Serial2 = serial[1]
+		}
 	}
 
 	if kvm != "" {
