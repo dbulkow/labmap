@@ -1,15 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"strings"
 	"sync"
 	"time"
+
+	kv "yin.mno.stratus.com/gogs/dbulkow/kv"
 )
 
 type Cabinet struct {
@@ -63,6 +63,7 @@ func (r *Reply) Failed(w http.ResponseWriter, errstr string) {
 var (
 	machines []string
 	cabinet  map[string]*Cabinet
+	keystore kv.KV
 	lock     sync.Mutex
 )
 
@@ -98,69 +99,80 @@ func serveMachines(w http.ResponseWriter, r *http.Request) {
 	rpy.Success(w)
 }
 
-func updateMap(words []string) {
-	machine := words[0]
-	cab := words[1]
-	pos := strings.TrimPrefix(words[2], "pos")
-	outlet := strings.TrimPrefix(words[5], "pdu")
-	com1 := strings.TrimPrefix(words[3], "com1-")
-	com2 := strings.TrimPrefix(words[4], "com2-")
-	kvm := ""
-	if len(words) == 7 {
-		kvm = strings.TrimPrefix(words[6], "kvm")
+type ComPort struct {
+	Enabled  bool   `json:"enabled"`
+	Speed    int    `json:"speed,omitempty"`
+	Bits     int    `json:"bits,omitempty"`
+	StopBits int    `json:"stopbits,omitempty"`
+	Parity   string `json:"parity,omitempty"`
+	Device   string `json:"device,omitempty"`
+}
+
+func (c *ComPort) String() string {
+	if !c.Enabled {
+		return "no"
+	}
+
+	return fmt.Sprintf("%d,%d,%d,%s:%s", c.Speed, c.Bits, c.StopBits, c.Parity, c.Device)
+}
+
+type Config struct {
+	Name     string  `json:"name"`
+	Cabinet  int     `json:"cabinet"`
+	Position int     `json:"position"`
+	COM1     ComPort `json:"com1"`
+	COM2     ComPort `json:"com2"`
+	PDU      int     `json:"pdu"`
+	KVM      int     `json:"kvm"`
+}
+
+func updateMap(val string) {
+	cfg := &Config{}
+
+	if err := json.Unmarshal([]byte(val), cfg); err != nil {
+		return
 	}
 
 	c := &Cabinet{
-		VTM0:     machine + "-vtm0",
-		VTM1:     machine + "-vtm1",
-		Cabinet:  strings.TrimPrefix(cab, "lnx"),
-		Position: pos,
-		Outlet:   outlet,
-		PDU0:     cab + "-pdu0",
-		PDU1:     cab + "-pdu1",
+		VTM0:     fmt.Sprintf("%s-vtm0", cfg.Name),
+		VTM1:     fmt.Sprintf("%s-vtm1", cfg.Name),
+		Cabinet:  fmt.Sprintf("%d", cfg.Cabinet),
+		Position: fmt.Sprintf("%d", cfg.Position),
+		Outlet:   fmt.Sprintf("%d", cfg.PDU),
+		PDU0:     fmt.Sprintf("lnx%d-pdu0", cfg.Cabinet),
+		PDU1:     fmt.Sprintf("lnx%d-pdu1", cfg.Cabinet),
+		KVM:      fmt.Sprintf("lnx%d-kvm", cfg.KVM),
 	}
 
-	if com1 != "no" {
-		c.COM1 = "telnet " + cab + "-debug 100" + pos + "1"
-		serial := strings.Split(com1, ":")
-		if len(serial) == 2 {
-			c.Params1 = serial[0]
-			c.Serial1 = serial[1]
-		}
+	if cfg.COM1.Enabled {
+		c.COM1 = fmt.Sprintf("telnet lnx%d-debug 100%d1", cfg.Cabinet, cfg.Position)
+		c.Params1 = cfg.COM1.String()
+		c.Serial1 = cfg.COM1.Device
 	}
 
-	if com2 != "no" {
-		c.COM2 = "telnet " + cab + "-debug 100" + pos + "2"
-		serial := strings.Split(com2, ":")
-		if len(serial) == 2 {
-			c.Params2 = serial[0]
-			c.Serial2 = serial[1]
-		}
+	if cfg.COM2.Enabled {
+		c.COM2 = fmt.Sprintf("telnet lnx%d-debug 100%d2", cfg.Cabinet, cfg.Position)
+		c.Params2 = cfg.COM2.String()
+		c.Serial2 = cfg.COM2.Device
 	}
 
-	if kvm != "" {
-		c.KVM = "lnx" + kvm + "-kvm"
-	}
-
-	cabinet[machine] = c
-	machines = append(machines, machine)
+	cabinet[cfg.Name] = c
+	machines = append(machines, cfg.Name)
 }
 
 func readmap(mapfile string) error {
 	lock.Lock()
 	defer lock.Unlock()
 
-	file, err := os.Open(mapfile)
+	pairs, err := keystore.List("labconfig")
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
 	machines = make([]string, 0)
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		updateMap(strings.Fields(scanner.Text()))
+	for _, p := range pairs {
+		updateMap(p.Val)
 	}
 
 	return nil
@@ -182,6 +194,7 @@ func main() {
 
 	machines = make([]string, 0)
 	cabinet = make(map[string]*Cabinet)
+	keystore = &kv.Consul{}
 
 	go func() {
 		for {
