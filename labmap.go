@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -126,6 +128,29 @@ type Config struct {
 	KVM      int     `json:"kvm"`
 }
 
+type byMachine []string
+
+func (b byMachine) Len() int      { return len(b) }
+func (b byMachine) Swap(i, j int) { b[i], b[j] = b[j], b[i] }
+func (b byMachine) Less(i, j int) bool {
+	if strings.HasPrefix(b[i], "lin") && !strings.HasPrefix(b[j], "lin") {
+		return true
+	}
+	if !strings.HasPrefix(b[i], "lin") && strings.HasPrefix(b[j], "lin") {
+		return false
+	}
+	if strings.HasPrefix(b[i], "lin") && strings.HasPrefix(b[j], "lin") {
+		if b[i][3] > b[j][3] {
+			return true
+		}
+		if b[i][3] < b[j][3] {
+			return false
+		}
+		return strings.Compare(b[i], b[j]) < 0
+	}
+	return strings.Compare(b[i], b[j]) < 0
+}
+
 func updateMap(val string) {
 	cfg := &Config{}
 
@@ -158,6 +183,8 @@ func updateMap(val string) {
 
 	cabinet[cfg.Name] = c
 	machines = append(machines, cfg.Name)
+
+	sort.Sort(byMachine(machines))
 }
 
 func readmap(mapfile string) error {
