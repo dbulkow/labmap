@@ -12,65 +12,18 @@ import (
 	"time"
 
 	kv "yin.mno.stratus.com/gogs/dbulkow/kv"
+	"yin.mno.stratus.com/gogs/dbulkow/labmap/api"
 )
-
-type Cabinet struct {
-	VTM0     string `json:"vtm0"`
-	VTM1     string `json:"vtm1"`
-	Cabinet  string `json:"cabinet"`
-	Position string `json:"position"`
-	COM1     string `json:"com1"`
-	Serial1  string `json:"serial1"`
-	Params1  string `json:"params1"`
-	COM2     string `json:"com2"`
-	Serial2  string `json:"serial2"`
-	Params2  string `json:"params2"`
-	Outlet   string `json:"outlet"`
-	KVM      string `json:"kvm"`
-	PDU0     string `json:"pdu0"`
-	PDU1     string `json:"pdu1"`
-}
-
-type Reply struct {
-	Status   string              `json:"status"`
-	Error    string              `json:"error,omitempty"`
-	Cabinet  *Cabinet            `json:"cabinet,omitempty"`
-	Cabinets map[string]*Cabinet `json:"cabinets,omitempty"`
-	Machines []string            `json:"machines,omitempty"`
-}
-
-func (r *Reply) Reply(w http.ResponseWriter) {
-	b, err := json.MarshalIndent(r, "", "    ")
-	if err != nil {
-		http.Error(w, "Internal Error", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-type", "application/json")
-	w.Header().Set("Cache-control", "no-cache")
-	w.Write(b)
-}
-
-func (r *Reply) Success(w http.ResponseWriter) {
-	r.Status = "Success"
-	r.Reply(w)
-}
-
-func (r *Reply) Failed(w http.ResponseWriter, errstr string) {
-	r.Status = "Failed"
-	r.Error = errstr
-	r.Reply(w)
-}
 
 var (
 	machines []string
-	cabinet  map[string]*Cabinet
+	cabinet  map[string]*api.Cabinet
 	keystore kv.KV
 	lock     sync.Mutex
 )
 
 func serveCabinets(w http.ResponseWriter, r *http.Request) {
-	var rpy Reply
+	var rpy api.Reply
 
 	lock.Lock()
 	defer lock.Unlock()
@@ -92,7 +45,7 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveMachines(w http.ResponseWriter, r *http.Request) {
-	var rpy Reply
+	var rpy api.Reply
 
 	lock.Lock()
 	defer lock.Unlock()
@@ -158,7 +111,7 @@ func updateMap(val string) {
 		return
 	}
 
-	c := &Cabinet{
+	c := &api.Cabinet{
 		VTM0:     fmt.Sprintf("%s-vtm0", cfg.Name),
 		VTM1:     fmt.Sprintf("%s-vtm1", cfg.Name),
 		Cabinet:  fmt.Sprintf("%d", cfg.Cabinet),
@@ -205,11 +158,6 @@ func readmap(mapfile string) error {
 	return nil
 }
 
-const (
-	CabinetBase = "/v1/cabinet/"
-	MachineBase = "/v1/machines/"
-)
-
 func main() {
 	var (
 		port    = flag.String("port", "8080", "http port number")
@@ -220,7 +168,7 @@ func main() {
 	flag.Parse()
 
 	machines = make([]string, 0)
-	cabinet = make(map[string]*Cabinet)
+	cabinet = make(map[string]*api.Cabinet)
 	keystore = &kv.Consul{}
 
 	go func() {
@@ -237,8 +185,8 @@ func main() {
 	}()
 
 	mux := http.NewServeMux()
-	mux.Handle(MachineBase, http.StripPrefix(MachineBase, http.HandlerFunc(serveMachines)))
-	mux.Handle(CabinetBase, http.StripPrefix(CabinetBase, http.HandlerFunc(serveCabinets)))
+	mux.Handle(api.MachineBase, http.StripPrefix(api.MachineBase, http.HandlerFunc(serveMachines)))
+	mux.Handle(api.CabinetBase, http.StripPrefix(api.CabinetBase, http.HandlerFunc(serveCabinets)))
 
 	srv := &http.Server{
 		Addr:           ":" + *port,
