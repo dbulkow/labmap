@@ -93,7 +93,7 @@ func getData(url, uri string) (*Reply, error) {
 }
 
 func GetCabinet(url, machine string) (*Cabinet, error) {
-	rpy, err := getData(url, CabinetBase)
+	rpy, err := getData(url, CabinetBase+machine)
 	if err != nil {
 		return nil, fmt.Errorf("get cabinet (%s%s): %v", url, CabinetBase, err)
 	}
