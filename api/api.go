@@ -85,6 +85,10 @@ func getData(url, uri string) (*Reply, error) {
 		return nil, fmt.Errorf("unmarshal: %v", err)
 	}
 
+	if rpy.Status != "Success" {
+		return nil, fmt.Errorf("status: %s", rpy.Status)
+	}
+
 	return rpy, nil
 }
 
