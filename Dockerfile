@@ -4,8 +4,7 @@ MAINTAINER David Bulkow <david.bulkow@stratus.com>
 RUN mkdir -p /go/src/app
 WORKDIR /go/src/app
 
-CMD ["go-wrapper", "run", "-map", "/resources/lab.map"]
+CMD ["go-wrapper", "run"]
 
-COPY . /go/src/app
-COPY lab.map /resources/lab.map
-RUN go-wrapper download --insecure; go-wrapper install
+RUN go-wrapper download --insecure yin.mno.stratus.com/gogs/dbulkow/labmap
+RUN go-wrapper install yin.mno.stratus.com/gogs/dbulkow/labmap
