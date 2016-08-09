@@ -37,7 +37,7 @@ func TestMachine(t *testing.T) {
 func TestCabinets(t *testing.T) {
 	cabinet = make(map[string]*api.Cabinet)
 
-	if err := readmap("testdata/cabinet.map"); err != nil {
+	if err := readmap(); err != nil {
 		t.Fatal("readmap error:", err)
 	}
 
@@ -59,7 +59,7 @@ func TestCabinets(t *testing.T) {
 func TestCabinet(t *testing.T) {
 	cabinet = make(map[string]*api.Cabinet)
 
-	if err := readmap("testdata/cabinet.map"); err != nil {
+	if err := readmap(); err != nil {
 		t.Fatal("readmap error:", err)
 	}
 
@@ -81,7 +81,7 @@ func TestCabinet(t *testing.T) {
 func TestCabinetNotFound(t *testing.T) {
 	cabinet = make(map[string]*api.Cabinet)
 
-	if err := readmap("testdata/cabinet.map"); err != nil {
+	if err := readmap(); err != nil {
 		t.Fatal("readmap error:", err)
 	}
 
@@ -111,7 +111,7 @@ func TestCabinetNotFound(t *testing.T) {
 func TestReadmapNoFile(t *testing.T) {
 	cabinet = make(map[string]*api.Cabinet)
 
-	if err := readmap("testdata/no_file"); err == nil {
+	if err := readmap(); err == nil {
 		t.Fatal("expected readmap error, got none")
 	}
 }

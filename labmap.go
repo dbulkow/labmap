@@ -140,7 +140,7 @@ func updateMap(val string) {
 	sort.Sort(byMachine(machines))
 }
 
-func readmap(mapfile string) error {
+func readmap() error {
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -161,7 +161,6 @@ func readmap(mapfile string) error {
 func main() {
 	var (
 		port    = flag.String("port", "8080", "http port number")
-		labmap  = flag.String("map", "lab.map", "lab configuration map")
 		refresh = flag.Int("refresh", 60, "Time between map refresh scans")
 	)
 
@@ -173,7 +172,7 @@ func main() {
 
 	go func() {
 		for {
-			if err := readmap(*labmap); err != nil {
+			if err := readmap(); err != nil {
 				log.Println("readmap", err)
 			}
 			log.Println("scan complete")
