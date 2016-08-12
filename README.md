@@ -2,7 +2,7 @@
 
 Serves Linux lab layout data.  A lab map holds the cabinet/rack, location in cabinet COM port connections PDU and KVM details.  The goal of labmap is to provide the backing data needed for services that want to know cabinet-level details for ftServer machines, such as the VTM links web page.
 
-Configuration data is loaded from [lab.map](http://yin/gogs/dbulkow/lab_config/raw/master/config/lab.map), which contains data like the following:
+Configuration data is loaded from [lab.map](http://yin.mno.stratus.com/gogs/dbulkow/lab_config/raw/master/config/lab.map), which contains data like the following:
 
 ~~~~
 lin301   lnx1 pos0 com1-no                        com2-57600,8,1,N:/dev/ttyUSB0  pdu5 kvm3
@@ -15,7 +15,7 @@ elliot   lnx7 pos3 com1-no                        com2-57600,8,1,N:/dev/ttyUSB3 
 
 Configuration is stored in [Consul](http://consul.io) key/value storage, distributed across many of the lab infrastructure for redundancy and access.
 
-To deploy the labmap service listening on a non-default port number, specify _-port <port number>_ on the command line.
+To deploy the labmap service listening on a non-default port number, specify a port number on the command line.
 
 ~~~~
 Usage of ./labmap:
