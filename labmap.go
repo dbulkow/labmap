@@ -28,6 +28,10 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 	lock.Lock()
 	defer lock.Unlock()
 
+	if err := readmap(); err != nil {
+		log.Println("serve machines readmap: %v", err)
+	}
+
 	machine := r.URL.Path
 
 	if machine != "" {
@@ -49,6 +53,10 @@ func serveMachines(w http.ResponseWriter, r *http.Request) {
 
 	lock.Lock()
 	defer lock.Unlock()
+
+	if err := readmap(); err != nil {
+		log.Println("serve machines readmap: %v", err)
+	}
 
 	rpy.Machines = machines
 	rpy.Success(w)
@@ -141,9 +149,6 @@ func updateMap(val string) {
 }
 
 func readmap() error {
-	lock.Lock()
-	defer lock.Unlock()
-
 	pairs, err := keystore.List("labconfig")
 	if err != nil {
 		return err
@@ -159,29 +164,13 @@ func readmap() error {
 }
 
 func main() {
-	var (
-		port    = flag.String("port", "8080", "http port number")
-		refresh = flag.Int("refresh", 60, "Time between map refresh scans")
-	)
+	var port = flag.String("port", "8080", "http port number")
 
 	flag.Parse()
 
 	machines = make([]string, 0)
 	cabinet = make(map[string]*api.Cabinet)
 	keystore = &kv.Consul{}
-
-	go func() {
-		for {
-			if err := readmap(); err != nil {
-				log.Println("readmap", err)
-			}
-			log.Println("scan complete")
-			if *refresh == 0 {
-				return
-			}
-			time.Sleep(time.Minute * time.Duration(*refresh))
-		}
-	}()
 
 	mux := http.NewServeMux()
 	mux.Handle(api.MachineBase, http.StripPrefix(api.MachineBase, http.HandlerFunc(serveMachines)))
