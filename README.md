@@ -1,29 +1,64 @@
 # Lab Map
 
-Serves Linux lab layout data.  A lab map holds the cabinet/rack, location in cabinet COM port connections PDU and KVM details.
+Serves Linux lab layout data.  A lab map holds the cabinet/rack, location in cabinet COM port connections PDU and KVM details.  The goal of labmap is to provide the backing data needed for services that want to know cabinet-level details for ftServer machines, such as the VTM links web page.
+
+Configuration data is loaded from [lab.map](http://yin/gogs/dbulkow/lab_config/raw/master/config/lab.map), which contains data like the following:
 
 ~~~~
-lin301  lnx1 pos0 com1-no  com2-yes pdu5 kvm3
-lin302  lnx2 pos0 com1-no  com2-yes pdu5 kvm3
-lin303  lnx6 pos0 com1-no  com2-yes pdu6 kvm6
-lin304  lnx3 pos0 com1-yes com2-no  pdu5 kvm3
-lin305  lnx4 pos0 com1-yes com2-yes pdu4 kvm4
-lin306  lnx7 pos0 com1-no  com2-yes pdu5 kvm6
+lin301   lnx1 pos0 com1-no                        com2-57600,8,1,N:/dev/ttyUSB0  pdu5 kvm3
+lin304   lnx3 pos0 com1-57600,8,1,N:/dev/ttyUSB0  com2-no                        pdu5 kvm3
+lin01    lnx1 pos1 com1-no                        com2-57600,8,1,N:/dev/ttyUSB1  pdu6 kvm3
+lin02    lnx2 pos1 com1-no                        com2-57600,8,1,N:/dev/ttyUSB1  pdu6 kvm3
+bahamut  lnx4 pos2 com1-57600,8,1,N:/dev/ttyUSB3  com2-no                        pdu6 kvm4
+elliot   lnx7 pos3 com1-no                        com2-57600,8,1,N:/dev/ttyUSB3  pdu8 kvm6
 ~~~~
 
-The goal of labmap is to provide the backing data needed for the VTM links web page.  lab.map should be deployed from the lab_config git repository so that changes in git are reflected in the web page.
+Configuration is stored in [Consul](http://consul.io) key/value storage, distributed across many of the lab infrastructure for redundancy and access.
+
+To deploy the labmap service listening on a non-default port number, specify _-port <port number>_ on the command line.
 
 ~~~~
 Usage of ./labmap:
-  -map string
-    	lab configuration map (default "lab.map")
   -port string
-    	http port number (default "8889")
-  -refresh int
-    	Time between map refresh scans (default 60)
+    	http port number (default "8080")
 ~~~~
 
-# List machines
+# Labmap API - golang
+
+~~~~
+func GetCabinet(url, machine string) (*Cabinet, error)
+func Cabinets(url string) (map[string]*Cabinet, error)
+func Machines(url string) ([]string, error)
+~~~~
+
+# Key/Value Storage
+
+Lab configuration data is stored under the _directory_ `labconfig`.  The hostname is used as the key and the value is JSON encoded data using the following golang structures:
+
+~~~~
+type ComPort struct {
+	Enabled  bool   `json:"enabled"`
+	Speed    int    `json:"speed,omitempty"`
+	Bits     int    `json:"bits,omitempty"`
+	StopBits int    `json:"stopbits,omitempty"`
+	Parity   string `json:"parity,omitempty"`
+	Device   string `json:"device,omitempty"`
+}
+
+type Config struct {
+	Name     string  `json:"name"`
+	Cabinet  int     `json:"cabinet"`
+	Position int     `json:"position"`
+	COM1     ComPort `json:"com1"`
+	COM2     ComPort `json:"com2"`
+	PDU      int     `json:"pdu"`
+	KVM      int     `json:"kvm"`
+}
+~~~~
+
+# Web API
+
+## List machines
 
 Returns a list of machines from lab.map.  Used by labhtml to order the machine list on the VTM links paage.
 
@@ -64,7 +99,7 @@ type Reply struct {
 | error    | string   | When status is "Failed" the error field will be error test from the server |
 | machines | array of string | Machine names |
 
-# List of Cabinets
+## List of Cabinets
 
 Without a machine name in the URL the reply will be a map of Cabinets.
 
@@ -188,10 +223,4 @@ type Cabinet struct {
 | pdu0     | string | Name of PDU0 |
 | pdu1     | string | Name of PDU1 |
 
-Names can be decoded using the macmap service.
-
-# Docker environment
-
-~~~~
-docker run --rm -it -v <path to lab_config/bmcs/lab.map:/resources/lab.map -p 9001:8889 --name labmap labmap
-~~~~
+Hostname addresses can be determined using the macmap service.
