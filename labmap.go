@@ -29,7 +29,7 @@ func serveCabinets(w http.ResponseWriter, r *http.Request) {
 	defer lock.Unlock()
 
 	if err := readmap(); err != nil {
-		log.Println("serve machines readmap: %v", err)
+		log.Printf("serve machines readmap: %v", err)
 	}
 
 	machine := r.URL.Path
@@ -55,7 +55,7 @@ func serveMachines(w http.ResponseWriter, r *http.Request) {
 	defer lock.Unlock()
 
 	if err := readmap(); err != nil {
-		log.Println("serve machines readmap: %v", err)
+		log.Printf("serve machines readmap: %v", err)
 	}
 
 	rpy.Machines = machines
