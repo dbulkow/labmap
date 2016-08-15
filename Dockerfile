@@ -1,10 +1,6 @@
-FROM golang:1.6
+FROM registry.access.redhat.com/rhel7:7.2-84
 MAINTAINER David Bulkow <david.bulkow@stratus.com>
 
-RUN mkdir -p /go/src/app
-WORKDIR /go/src/app
+ADD labmap /usr/bin
 
-CMD ["go-wrapper", "run"]
-
-RUN go-wrapper download --insecure yin.mno.stratus.com/gogs/dbulkow/labmap
-RUN go-wrapper install yin.mno.stratus.com/gogs/dbulkow/labmap
+CMD ["labmap"]
